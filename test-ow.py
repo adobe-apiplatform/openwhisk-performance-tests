@@ -11,7 +11,7 @@ ACTION_NAME = "test-async"
 class OWPerfTaskSet(TaskSet):
     def on_start(self):
         getActionRes = self.client.get(ACTIONS_URL_PREFIX + "/" + ACTION_NAME, auth=(UUID, AUTH_TOKEN))
-        if (getActionRes.status_code == 404):
+        if (getActionRes.status_code == 200):
             deleteActionRes = self.client.delete(
                 ACTIONS_URL_PREFIX + "/" + ACTION_NAME,
                 auth = (UUID, AUTH_TOKEN)
@@ -47,5 +47,3 @@ class OWPerfTaskSet(TaskSet):
 
 class OWPerfLocust(HttpLocust):
     task_set = OWPerfTaskSet
-    min_wait = 5000
-    max_wait = 15000

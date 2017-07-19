@@ -1,0 +1,51 @@
+{
+  "id": "/locust-slave",
+  "instances": 1,
+  "args": [
+    "--slave",
+    "--master-host",
+    "locust-master.marathon.mesos",
+    "--host",
+    "http://whisk-controller-mesos.marathon.mesos:8888",
+    "-f",
+    "/mnt/mesos/sandbox/test-ping.py"
+  ],
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "image": "adobeapiplatform/locustio",
+      "network": "BRIDGE",
+      "privileged": false,
+      "forcePullImage": false,
+      "portMappings": [
+        {
+          "containerPort": 0,
+          "hostPort": 0,
+          "protocol": "tcp",
+          "name": "default"
+        }
+      ]
+    }
+  },
+  "cpus": 0.1,
+  "mem": 256,
+  "requirePorts": true,
+  "fetch": [
+    {
+      "uri": "https://path/to/locust/test-ping.py",
+      "extract": true,
+      "executable": false,
+      "cache": false
+    }
+  ],
+  "upgradeStrategy": {
+    "minimumHealthCapacity": 1,
+    "maximumOverCapacity": 1
+  },
+  "unreachableStrategy": {
+    "inactiveAfterSeconds": 300,
+    "expungeAfterSeconds": 600
+  },
+  "killSelection": "OLDEST_FIRST",
+  "requirePorts": false
+}

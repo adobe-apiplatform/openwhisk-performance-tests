@@ -1,0 +1,44 @@
+{
+  "id": "/locust-master",
+  "instances": 1,
+  "args": [
+    "--master",
+    "--host",
+    "http://whisk-controller-mesos.marathon.mesos:8888",
+    "-f",
+    "/mnt/mesos/sandbox/test-ping.py"
+    ],
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "image": "adobeapiplatform/locustio",
+      "network": "BRIDGE",
+      "portMappings": [
+        {
+          "containerPort": 8089,
+          "hostPort": 0,
+          "protocol": "tcp"
+        },
+        {
+          "containerPort": 5557,
+          "hostPort": 5557,
+          "protocol": "tcp"
+        },
+        {
+          "containerPort": 5558,
+          "hostPort": 5558,
+          "protocol": "tcp"
+        }
+      ]
+    }
+  },
+  "cpus": 1,
+  "mem": 256,
+  "requirePorts": true,
+  "fetch": [
+    {
+      "uri": "https://path/to/locust/test-ping.py",
+      "cache": false
+    }
+  ]
+}

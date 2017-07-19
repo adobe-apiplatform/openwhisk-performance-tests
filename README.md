@@ -3,6 +3,16 @@ A suite of performance tests for Openwhisk based on [Locust.io](http://locust.io
 
 ### Running the tests from the local machine
 
+#### Using Locust
+
+Make sure Locust is installed on the machine and then execute:
+
+```bash
+$ locust --host http://openwhisk_host -f test-ow.py
+```
+
+#### Using Docker
+
 ```bash
 $ make docker
 ```

@@ -1,6 +1,15 @@
 # openwhisk-performance-tests
 A suite of performance tests for Openwhisk based on [Locust.io](http://locust.io/).
 
+### Setting up
+
+```bash
+$ make create-actions
+```
+This command creates 2 actions:
+* `test-async` - an async action that returns after a timeout
+* `test-async-sequence` - a sequence action composed of 3 `test-async` actions
+
 ### Running the tests from the local machine
 
 #### Using Locust
@@ -11,7 +20,7 @@ Make sure Locust is installed on the machine and then execute:
 $ locust --host http://openwhisk_host -f test-ow.py
 ```
 
-#### Using Docker
+#### Using Docker with Locust Master and Slave
 
 ```bash
 $ make docker

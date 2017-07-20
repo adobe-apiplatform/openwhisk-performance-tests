@@ -1,21 +1,28 @@
-HOST = http://127.0.0.1:8888
-AUTH_TOKEN = 23bc46b1-71f6-4ed5-8c54-816aa4f8c502:123zO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP
-ACTIONS_URL_PREFIX = $(HOST)/api/v1/namespaces/guest/actions
+HOST ?= $(shell cat ~/.wskprops | grep HOST | awk -F= '{print $$2}')
+AUTH_TOKEN ?= $(shell cat ~/.wskprops | grep AUTH | awk -F= '{print $$2}')
+NAMESPACE ?= $(shell cat ~/.wskprops | grep NAMESPACE | awk -F= '{print $$2}')
+ACTIONS_URL_PREFIX ?= $(HOST)/api/v1/namespaces/$(NAMESPACE)/actions
+ACTION_CODE = $(shell cat timeout.js | sed  s/\"/\\\\\"/g | awk '{printf "%s\\n", $$0}')
 
 .PHONY: docker
 docker:
 	docker build -t whisk/locustio .
 
 .PHONY: run-test-action
-run-test-action: create-action invoke-action delete-action
+run-test-action: create-actions invoke-action delete-action
 
-.PHONY: create-action
-create-action:
+.PHONY: create-actions
+create-actions:
 	echo "$$(tput setaf 2)creating the test action ...$$(tput sgr0)"
 	curl -u $(AUTH_TOKEN) \
 			 -H "Content-Type:application/json" \
-			 -XPUT -d '{"namespace":"_","name":"test-async","exec":{"kind":"nodejs:default","code":"$(cat timeout.js)"}}' -H "Content-Type: application/json" \
+			 -XPUT -d '{"namespace":"_","name":"test-async","exec":{"kind":"nodejs:default","code":"$(ACTION_CODE)"}}' -H "Content-Type: application/json" \
 			 $(ACTIONS_URL_PREFIX)/test-async
+	echo "$$(tput setaf 2)creating the sequence test action ...$$(tput sgr0)"
+	curl -u $(AUTH_TOKEN) \
+ 			 -H "Content-Type:application/json" \
+ 			 -XPUT -d '{"namespace":"'$(NAMESPACE)'","name":"test-async-sequence","exec":{"kind":"sequence","components":["/'$(NAMESPACE)'/test-async","/'$(NAMESPACE)'/test-async","/'$(NAMESPACE)'/test-async"]}}' -H "Content-Type: application/json" \
+ 			 $(ACTIONS_URL_PREFIX)/test-async-sequence
 
 .PHONY: list-actions
 list-actions:
@@ -34,10 +41,15 @@ invoke-action:
 	    -m POST -H "Content-Type:application/json" \
 	            $(ACTIONS_URL_PREFIX)/test-async?blocking=true
 
-.PHONY: delete-action
-delete-action:
+.PHONY: delete-actions
+delete-actions:
 	echo "$$(tput setaf 2)deleting the test action ...$$(tput sgr0)"
-	 curl -u $(AUTH_TOKEN) \
-	 		 -H "Content-Type:application/json" \
-	 		 -XDELETE \
-	 		 $(ACTIONS_URL_PREFIX)/test-async
+	curl -u $(AUTH_TOKEN) \
+		 -H "Content-Type:application/json" \
+		 -XDELETE \
+		 $(ACTIONS_URL_PREFIX)/test-async
+	echo "$$(tput setaf 2)deleting the test action ...$$(tput sgr0)"
+	curl -u $(AUTH_TOKEN) \
+			 -H "Content-Type:application/json" \
+			 -XDELETE \
+			 $(ACTIONS_URL_PREFIX)/test-async-sequence
